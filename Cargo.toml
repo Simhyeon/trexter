@@ -1,0 +1,6 @@
+[package]
+name = "tracks"
+version = "0.1.0"
+edition = "2021"
+author = "Simon creek"
+License = "MIT or Apache 2.0"
