@@ -3,10 +3,7 @@ pub struct Tracker<T> {
     tracks: Vec<Track<T>>,
 }
 
-impl<T> Tracker<T>
-where
-    T: Clone + Copy,
-{
+impl<T> Tracker<T> {
     pub fn new(start: T) -> Self {
         Self {
             distance: Track::new(start),
@@ -14,8 +11,8 @@ where
         }
     }
 
-    pub fn get_full_track(&self) -> Track<T> {
-        let mut full_track = self.distance;
+    pub fn get_full_track(&self) -> Track<&T> {
+        let mut full_track = Track::new(&self.distance.milestone);
 
         for track in &self.tracks {
             full_track.line_index += track.line_index;
@@ -24,11 +21,11 @@ where
         full_track
     }
 
-    pub fn get_track(&self) -> &Track<T> {
+    pub fn get_track(&self) -> Track<&T> {
         if self.tracks.is_empty() {
-            &self.distance
+            Track::new(&self.distance.milestone)
         } else {
-            self.tracks.last().unwrap()
+            Track::new(&self.tracks.last().unwrap().milestone)
         }
     }
 
@@ -81,7 +78,7 @@ where
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug)]
 pub struct Track<T> {
     pub line_index: usize,
     pub char_index: usize,
