@@ -28,7 +28,11 @@ impl<T> Tracker<T> {
 
         for track in &self.tracks {
             full_track.line_index += track.line_index;
-            full_track.char_index = track.char_index;
+            if track.line_index == 0 {
+                full_track.char_index += track.char_index;
+            } else {
+                full_track.char_index = track.char_index;
+            }
         }
         full_track
     }
@@ -125,7 +129,7 @@ impl<T> Track<T> {
 
     pub fn merge(&mut self, track: &Track<T>) {
         self.line_index += track.line_index;
-        if self.line_index == track.line_index {
+        if track.line_index == 0 {
             self.char_index += track.char_index;
         } else {
             self.char_index = track.char_index;
