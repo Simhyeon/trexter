@@ -1,3 +1,3 @@
 mod tracker;
 
-pub use tracker::Tracker;
+pub use tracker::{Track, Tracker};

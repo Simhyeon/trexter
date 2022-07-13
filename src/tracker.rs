@@ -1,3 +1,5 @@
+/// Main entry for tracking progression
+#[derive(Debug)]
 pub struct Tracker<T> {
     distance: Track<T>,
     tracks: Vec<Track<T>>,
@@ -11,12 +13,37 @@ impl<T> Tracker<T> {
         }
     }
 
+    pub fn get_distance(&self) -> &Track<T> {
+        &self.distance
+    }
+
+    pub fn get_track_counts(&self) -> usize {
+        self.tracks.len()
+    }
+
     pub fn get_full_track(&self) -> Track<&T> {
         let mut full_track = Track::new(&self.distance.milestone);
+        full_track.line_index = self.distance.line_index;
+        full_track.char_index = self.distance.char_index;
 
         for track in &self.tracks {
             full_track.line_index += track.line_index;
-            full_track.char_index += track.char_index;
+            full_track.char_index = track.char_index;
+        }
+        full_track
+    }
+
+    pub fn get_sub_track(&self, reverse_index: usize) -> Track<&T> {
+        let mut full_track = Track::new(&self.distance.milestone);
+        full_track.line_index = self.distance.line_index;
+        full_track.char_index = self.distance.char_index;
+
+        let max = self.tracks.len();
+        let end = max - (reverse_index).min(max);
+
+        for track in &self.tracks[0..end] {
+            full_track.line_index += track.line_index;
+            full_track.char_index = track.char_index;
         }
         full_track
     }
@@ -45,10 +72,10 @@ impl<T> Tracker<T> {
         // There is still offet remaining
         if self.tracks.is_empty() {
             // Only basic distance is left
-            self.distance.merge(last_track);
+            self.distance.merge(&last_track);
             true
         } else {
-            self.get_last_track_mut().merge(last_track);
+            self.get_last_track_mut().merge(&last_track);
             true
         }
     }
@@ -72,12 +99,14 @@ impl<T> Tracker<T> {
         }
     }
 
-    pub fn set_milestone(&mut self, milestone: T) {
-        let track = Track::new(milestone);
+    pub fn new_track(&mut self, milestone: T) {
+        let mut track = Track::new(milestone);
+        track.line_index = 0;
         self.tracks.push(track);
     }
 }
 
+/// Tracking unit
 #[derive(Debug)]
 pub struct Track<T> {
     pub line_index: usize,
@@ -94,8 +123,12 @@ impl<T> Track<T> {
         }
     }
 
-    pub fn merge(&mut self, track: Track<T>) {
+    pub fn merge(&mut self, track: &Track<T>) {
         self.line_index += track.line_index;
-        self.char_index += track.char_index;
+        if self.line_index == track.line_index {
+            self.char_index += track.char_index;
+        } else {
+            self.char_index = track.char_index;
+        }
     }
 }
